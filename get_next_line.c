@@ -83,6 +83,7 @@ static int	ft_getsize (t_list_gnl *current)
 	}
 	return (i);
 }
+
 char	*ft_create_output(t_list_gnl *out_list, char *buffer)
 {
 	size_t		i;
