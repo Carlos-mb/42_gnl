@@ -1,8 +1,8 @@
 #include "get_next_line.h"
 
-char	ft_read_char(int fd, char *buffer)
+int	ft_read_char(int fd, char *buffer)
 {
-	char	output;
+	int		output;
 	ssize_t	bytes_read;
 	size_t	i;
 
@@ -10,7 +10,10 @@ char	ft_read_char(int fd, char *buffer)
 	{
 		bytes_read = read (fd, buffer, BUFFER_SIZE);
 		if (bytes_read < 0)
-			buffer[0] = -1;
+		{
+			buffer[0] = '\0';
+			return (-1);
+		}
 		else
 			buffer[bytes_read] = '\0';
 	}
@@ -94,7 +97,7 @@ char	*ft_create_output(t_list_gnl *out_list, char *buffer)
 	i = ft_getsize(out_list);
 	if (i > 0)
 	{
-		output = malloc ((sizeof(char *) * i) + 1);
+		output = malloc (sizeof(char) * (i + 1));
 		if (!output)
 		{
 			ft_lst_clear(out_list);
@@ -120,7 +123,7 @@ char	*ft_create_output(t_list_gnl *out_list, char *buffer)
 
 char	*get_next_line(int fd)
 {
-	char		c_read;
+	int			c_read;
 	static char	buffer [BUFFER_SIZE + 1];
 	t_list_gnl	*out_list;
 	t_list_gnl	*current_text;
