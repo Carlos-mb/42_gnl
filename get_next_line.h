@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cmelero- <cmelero-@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/01/20 11:39:17 by cmelero-          #+#    #+#             */
+/*   Updated: 2026/01/20 11:39:17 by cmelero-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
@@ -15,7 +27,9 @@ typedef struct s_list
 	struct s_list	*next;		
 }					t_list_gnl;
 
-char	*get_next_line(int fd);
-
+char		*get_next_line(int fd);
+t_list_gnl	*ft_lst_new(void);
+void		ft_lst_clear(t_list_gnl **lst);
+size_t		ft_getsize(t_list_gnl *current);
 
 #endif
