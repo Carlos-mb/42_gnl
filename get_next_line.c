@@ -1,5 +1,4 @@
 #include "get_next_line.h"
-#include <stdio.h>
 
 int	ft_read_char(int fd, char *buffer, char *c_read, int pos)
 {
@@ -41,7 +40,6 @@ t_list_gnl	*ft_lst_new(void)
 	output = malloc(sizeof(t_list_gnl));
 	if (!(output))
 	{
-		printf("111111111111111111111111111111111111111111");
 		return (NULL);
 	}
 	output->text[0] = '\0';
@@ -83,7 +81,7 @@ void	ft_lst_clear(t_list_gnl *lst)
 	}
 }
 
-static int	ft_getsize (t_list_gnl *current)
+static size_t	ft_getsize (t_list_gnl *current)
 {
 	size_t	i;
 
@@ -108,7 +106,6 @@ char	*ft_create_output(t_list_gnl *out_list, char *buffer)
 		output = malloc (sizeof(char) * (i + 1) );
 		if (!output)
 			{
-				printf("22222222222222222222222222222222");
 				ft_lst_clear(out_list);
 				buffer[0] = '\0';
 				return (NULL);
@@ -149,14 +146,23 @@ char	*get_next_line(int fd)
 	while (c_read != '\n' && c_read != '\0' && current_text != NULL && readed > 0)
 	{
 		readed = ft_read_char(fd, buffer, &c_read, current_text->pos);
-		if ( readed >= 0)
-			ft_add_char(c_read, &current_text);
+		if (readed >= 0)
+		{
+			if (c_read == '\0')
+				break;
+			if (!ft_add_char(c_read, &current_text))
+			{
+				ft_lst_clear(out_list);
+				buffer[0] = '\0';
+				return (NULL);
+			}
+		}
 		else
-		{			
+		{
 			ft_lst_clear(out_list);
 			buffer[0] = '\0';
 			return (NULL);
-		}			
+		}
 	}
 	return (ft_create_output(out_list, buffer));
 }
@@ -177,7 +183,7 @@ int printa (int f)
 	return (c != NULL);
 }
 
-int xmain (int argn, char **argv)
+int main (int argn, char **argv)
 {
 	int 	f;
 
@@ -201,9 +207,9 @@ int xmain (int argn, char **argv)
 	(void) argv;
 
 
-	//f = open("el_quijote.txt", 0);	
-	//while (printa(f));
-	//close(f);
+	f = open("el_quijote.txt", 0);	
+	while (printa(f));
+	close(f);
 
 	f = open("1char.txt", 0);	
 	while (printa(f));
