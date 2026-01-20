@@ -1,20 +1,27 @@
 #include "get_next_line.h"
+#include <stdio.h>
 
-char	ft_read_char(int fd, char *buffer)
+int	ft_read_char(int fd, char *buffer, char *c_read, int pos)
 {
-	char	output;
 	ssize_t	bytes_read;
 	size_t	i;
 
-	if (buffer[0] == '\0')
+	(void) pos;
+	if (buffer[0] == '\0') // && (pos == 0 || pos == BUFFER_SIZE))// (pos == 0 || pos == BUFFER_SIZE + 1)
+	//printf("pos%d, BUF%d\n", pos, BUFFER_SIZE);
 	{
 		bytes_read = read (fd, buffer, BUFFER_SIZE);
 		if (bytes_read < 0)
+		{
 			buffer[0] = '\0';
+			*c_read = '\0';
+			return (-1);
+		}
 		else
 			buffer[bytes_read] = '\0';
 	}
-	output = buffer[0];
+	*c_read = buffer[0];
+	// ¿sobra if pq lo hace el while?
 	if (buffer[0] != '\0')
 	{
 		i = 0;
@@ -24,7 +31,7 @@ char	ft_read_char(int fd, char *buffer)
 			i++;
 		}
 	}
-	return (output);
+	return (1);
 }
 
 t_list_gnl	*ft_lst_new(void)
@@ -33,14 +40,17 @@ t_list_gnl	*ft_lst_new(void)
 
 	output = malloc(sizeof(t_list_gnl));
 	if (!(output))
+	{
+		printf("111111111111111111111111111111111111111111");
 		return (NULL);
+	}
 	output->text[0] = '\0';
 	output->pos = 0;
 	output->next = NULL;
 	return (output);
 }
 
-void	ft_add_char(char c_read, t_list_gnl **p_current_text)
+int	ft_add_char(char c_read, t_list_gnl **p_current_text)
 {
 	t_list_gnl	*new_text;
 
@@ -48,7 +58,9 @@ void	ft_add_char(char c_read, t_list_gnl **p_current_text)
 	{
 		new_text = ft_lst_new();
 		if (!new_text)
-			return ;
+		{
+			return (0);
+		}
 		(*p_current_text)->next = new_text;
 		(*p_current_text) = new_text;
 	}
@@ -56,6 +68,7 @@ void	ft_add_char(char c_read, t_list_gnl **p_current_text)
 	(*p_current_text)->text[((*p_current_text)->pos) + 1] = '\0';
 	(*p_current_text)->pos += 1;
 	(*p_current_text)->next = NULL;
+	return (1);
 }
 
 void	ft_lst_clear(t_list_gnl *lst)
@@ -82,7 +95,7 @@ static int	ft_getsize (t_list_gnl *current)
 	}
 	return (i);
 }
-char	*ft_create_output(t_list_gnl *out_list)
+char	*ft_create_output(t_list_gnl *out_list, char *buffer)
 {
 	size_t		i;
 	size_t		j;
@@ -92,7 +105,14 @@ char	*ft_create_output(t_list_gnl *out_list)
 	i = ft_getsize(out_list);
 	if (i > 0)
 	{
-		output = malloc ((sizeof(char *) * i) + 1);
+		output = malloc (sizeof(char) * (i + 1) );
+		if (!output)
+			{
+				printf("22222222222222222222222222222222");
+				ft_lst_clear(out_list);
+				buffer[0] = '\0';
+				return (NULL);
+			}
 		i = 0;
 		current = out_list;
 		while (output && current)
@@ -116,22 +136,31 @@ char	*get_next_line(int fd)
 	static char	buffer [BUFFER_SIZE + 1];
 	t_list_gnl	*out_list;
 	t_list_gnl	*current_text;
+	int			readed;
 
-	if (fd <= 0)
+	if (fd < 0)
 		return (NULL);
 	out_list = ft_lst_new ();
 	if (!out_list)
 		return (NULL);
 	current_text = out_list;
 	c_read = ' ';
-	while (c_read != '\n' && c_read != '\0' && current_text != NULL)
+	readed = 1;
+	while (c_read != '\n' && c_read != '\0' && current_text != NULL && readed > 0)
 	{
-		c_read = ft_read_char(fd, buffer);
-		ft_add_char(c_read, &current_text);
+		readed = ft_read_char(fd, buffer, &c_read, current_text->pos);
+		if ( readed >= 0)
+			ft_add_char(c_read, &current_text);
+		else
+		{			
+			ft_lst_clear(out_list);
+			buffer[0] = '\0';
+			return (NULL);
+		}			
 	}
-	return (ft_create_output(out_list));
+	return (ft_create_output(out_list, buffer));
 }
-/*
+
 #include <stdio.h>
 #include <fcntl.h>
 
@@ -141,20 +170,18 @@ int printa (int f)
 
 	c = get_next_line(f);
 	if (c)
-		printf(c);
+		printf("%s", c);
 	else
 		printf("**NULL**");
 	free(c);
 	return (c != NULL);
 }
 
-int main (int argn, char **argv)
+int xmain (int argn, char **argv)
 {
 	int 	f;
 
-	// (void) argn;
-	// (void) argv;
-
+/*
 //	printf("StdIn:\n");
 //	while (printa(1));
 	while (--argn)
@@ -168,16 +195,23 @@ int main (int argn, char **argv)
 
 	return (1);
 }
-	*/
-	/*
-	f = open("prueba_fin_EOF.txt", 0);	
+*/	
+
+	(void) argn;
+	(void) argv;
+
+
+	//f = open("el_quijote.txt", 0);	
+	//while (printa(f));
+	//close(f);
+
+	f = open("1char.txt", 0);	
 	while (printa(f));
 	close(f);
 	printf("\n-----\n");
-	f = open("prueba_fin_null.txt", 0);	
+	f = open("one_line_no_nl.txt", 0);	
 	while (printa(f));
 	close(f);
 
 	return (1);
 }
-*/
